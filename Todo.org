@@ -1,0 +1,4 @@
+* Ideas
+** TODO In =kinopoisk-get-from-json=, transform CamelCase to dash-case
+* Need
+** TODO Add GitHub
