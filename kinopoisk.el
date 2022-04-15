@@ -5,6 +5,7 @@
 ;; Author: Semen Khramtsov <hrams205@gmail.com>
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "25.1") (dash "2.18.0") (s "1.12.0"))
+;; Homepage: https://github.com/semenInRussia/emacs-kinopoisk
 
 ;; This file is not part of GNU Emacs.
 
