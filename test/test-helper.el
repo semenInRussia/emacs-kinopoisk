@@ -1,6 +1,6 @@
-;;; test-helper.el --- Helper functions to test emacs-kinopoisk  -*- lexical-binding: t; -*-
+;;; test-helper.el --- Helper functions to test kinopoisk  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017 Semen Khramtsov
+;; Copyright (C) 2022 Semen Khramtsov
 
 ;; Author: Semen Khramtsov <hrams205@gmail.com>
 
@@ -23,9 +23,20 @@
 
 ;;; Code:
 
-(declare-function undercover "undercover")
-
-(when (require 'undercover nil t)
-  (undercover "emacs-kinopoisk.el"))
+(defun kinopoisk-ensure-is-valid-film (film)
+  "Ensure that FILM is valid object of `kinopoisk-film', check types of fields."
+  (should (kinopoisk-film-p film))
+  (should (numberp (kinopoisk-film-id film)))
+  (should (stringp (kinopoisk-film-name film)))
+  (should (stringp (kinopoisk-film-year film)))
+  (should (numberp (kinopoisk-film-rating film)))
+  (should (< 0 (kinopoisk-film-rating film) 100))
+  (should (stringp (kinopoisk-film-poster-url film)))
+  (should (stringp (kinopoisk-film-slogan film)))
+  (should (stringp (kinopoisk-film-rating-age-limits film)))
+  (should (stringp (kinopoisk-film-short-description film)))
+  (should (stringp (kinopoisk-film-description film)))
+  (should (numberp (kinopoisk-film-length film)))
+  (should (listp (kinopoisk-film-countries film))))
 
 ;;; test-helper.el ends here

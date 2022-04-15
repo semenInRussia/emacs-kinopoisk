@@ -57,23 +57,47 @@
    (rating :initarg :rating :accessor kinopoisk-film-rating)
    (poster-url
     :initarg :poster-url
-    :accessor kinopoisk-film-poster-url)
+    :accessor kinopoisk-film--poster-url)
    (length :initarg :length :accessor kinopoisk-film-length)
-   (countries :initarg :countries :accessor kinopoisk-film-countries))
+   (countries :initarg :countries :accessor kinopoisk-film-countries)
+   (slogan :initarg :slogan :accessor kinopoisk-film--slogan)
+   (description :initarg :description :accessor kinopoisk-film-description)
+   (short-description
+    :initarg :short-description
+    :accessor kinopoisk-film--short-description)
+   (rating-age-limits
+    :initarg :rating-age-limits
+    :accessor kinopoisk-film--rating-age-limits))
   "Object for films of Kinopoisk API.")
 
-(defmethod kinopoisk-film-original-name
-    ((film kinopoisk-film))
-  "Get `original-name' of FILM."
-  (unless (kinopoisk-film--original-name film)
-    (setf
-     (kinopoisk-film--original-name film)
-     (->>
-      film
-      (kinopoisk-film-id)
-      (kinopoisk-film-from-id)
-      (kinopoisk-film--original-name))))
-  (kinopoisk-film--original-name film))
+(defmacro kinopoisk-define-film-field-accessor (field-name)
+  "Define field accessor for fild of `kinopoisk-film' with name FIELD-NAME.
+Take value of FIELD-NAME from result of `kinopoisk-film-from-id'.
+When you use this macros, you should have accessor with followed name:
+`kinopoisk-film--<field-name>' (instead of <field-name> put FIELD-NAME)"
+  (let* ((field-name-str (symbol-name field-name))
+         (simple-accessor
+          (intern (s-concat "kinopoisk-film--" field-name-str)))
+         (accessor
+          (intern (s-concat "kinopoisk-film-" field-name-str))))
+    `(defmethod ,accessor
+         ((film kinopoisk-film))
+       ,(s-lex-format "Get `${field-name-str}' of FILM.")
+       (unless (,simple-accessor film)
+         (setf
+          (,simple-accessor film)
+          (->>
+           film
+           (kinopoisk-film-id)
+           (kinopoisk-film-from-id)
+           (,simple-accessor))))
+       (,simple-accessor film))))
+
+(kinopoisk-define-film-field-accessor original-name)
+(kinopoisk-define-film-field-accessor slogan)
+(kinopoisk-define-film-field-accessor short-description)
+(kinopoisk-define-film-field-accessor rating-age-limits)
+(kinopoisk-define-film-field-accessor poster-url)
 
 (defun kinopoisk-search-one-film (query)
   "Search one `kinopoisk-film' in Kinopoisk API, which best match with QUERY."
@@ -115,7 +139,11 @@
                                     `(kinopoisk--into-film-length val))
    :poster-url (kinopoisk-get-from-json 'posterUrl obj)
    :countries (kinopoisk--film-countries-from-json obj)
-   :rating (kinopoisk--film-rating-from-json obj)))
+   :rating (kinopoisk--film-rating-from-json obj)
+   :slogan (kinopoisk-get-from-json 'slogan obj)
+   :description (kinopoisk-get-from-json 'description obj)
+   :short-description (kinopoisk-get-from-json 'shortDescription obj)
+   :rating-age-limits (kinopoisk-get-from-json 'ratingAgeLimits obj)))
 
 (defun kinopoisk--film-rating-from-json (obj)
   "Get rating of `kinopoisk-film' by JSON OBJ of Kinopoisk API."

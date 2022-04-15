@@ -32,30 +32,14 @@
 (ert-deftest kinopoisk-search-films
     ()
   (let ((film (car (kinopoisk-search-films "матрица"))))
-    (should (kinopoisk-film-p film))
     (should (equal (kinopoisk-film-original-name film) "The Matrix"))
-    (should (numberp (kinopoisk-film-id film)))
-    (should (stringp (kinopoisk-film-name film)))
-    (should (stringp (kinopoisk-film-year film)))
-    (should (numberp (kinopoisk-film-rating film)))
-    (should (< 0 (kinopoisk-film-rating film) 100))
-    (should (stringp (kinopoisk-film-poster-url film)))
-    (should (numberp (kinopoisk-film-length film)))
-    (should (listp (kinopoisk-film-countries film)))))
+    (kinopoisk-ensure-is-valid-film film)))
 
 (ert-deftest kinopoisk-film-from-id
     ()
   (let ((film (kinopoisk-film-from-id 301)))
-    (should (kinopoisk-film-p film))
     (should (equal (kinopoisk-film-original-name film) "The Matrix"))
-    (should (numberp (kinopoisk-film-id film)))
-    (should (stringp (kinopoisk-film-name film)))
-    (should (stringp (kinopoisk-film-year film)))
-    (should (numberp (kinopoisk-film-rating film)))
-    (should (< 0 (kinopoisk-film-rating film) 100))
-    (should (stringp (kinopoisk-film-poster-url film)))
-    (should (numberp (kinopoisk-film-length film)))
-    (should (listp (kinopoisk-film-countries film)))))
+    (kinopoisk-ensure-is-valid-film film)))
 
 (ert-deftest kinopoisk-format-url
     ()
