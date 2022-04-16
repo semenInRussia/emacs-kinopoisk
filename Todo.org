@@ -1,4 +1,3 @@
 * Ideas
 ** TODO In =kinopoisk-get-from-json=, transform CamelCase to dash-case
-** TODO Make =kinopoisk-film-from-json= more Agile, Make List of Fields as Variable
    

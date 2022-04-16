@@ -66,6 +66,11 @@
       (kinopoisk-get-from-json 'a obj '(string-to-number val))
       1))))
 
+(ert-deftest kinopoisk-check--into-film-rating
+    ()
+  (should (= (kinopoisk--into-film-rating "10") 100))
+  (should (= (kinopoisk--into-film-rating 10) 100)))
+
 (ert-deftest kinopoisk-check--into-film-length
     ()
   (should (= (kinopoisk--into-film-length 136) 136))

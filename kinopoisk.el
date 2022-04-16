@@ -4,7 +4,7 @@
 
 ;; Author: Semen Khramtsov <hrams205@gmail.com>
 ;; Version: 0.1
-;; Package-Requires: ((emacs "25.1") (dash "2.18.0") (s "1.12.0"))
+;; Package-Requires: ((emacs "27.1") (dash "2.18.0") (s "1.12.0"))
 ;; Homepage: https://github.com/semenInRussia/emacs-kinopoisk
 
 ;; This file is not part of GNU Emacs.
@@ -47,28 +47,95 @@
   :group 'kinopoisk
   :type 'string)
 
-(defclass kinopoisk-film ()
-  ((id :initarg :id :accessor kinopoisk-film-id)
-   (name :initarg :name :accessor kinopoisk-film-name)
-   (original-name
-    :initarg :original-name
-    :accessor kinopoisk-film--original-name)
-   (year :initarg :year :accessor kinopoisk-film-year)
-   (rating :initarg :rating :accessor kinopoisk-film-rating)
-   (poster-url
-    :initarg :poster-url
-    :accessor kinopoisk-film--poster-url)
-   (length :initarg :length :accessor kinopoisk-film-length)
-   (countries :initarg :countries :accessor kinopoisk-film-countries)
-   (slogan :initarg :slogan :accessor kinopoisk-film--slogan)
-   (description :initarg :description :accessor kinopoisk-film-description)
-   (short-description
-    :initarg :short-description
-    :accessor kinopoisk-film--short-description)
-   (rating-age-limits
-    :initarg :rating-age-limits
-    :accessor kinopoisk-film--rating-age-limits))
-  "Object for films of Kinopoisk API.")
+(defcustom kinopoisk-in-search-film-fields
+  '(id name description year length countries rating poster-url)
+  "Fileds of `kinopoisk-film' which will accessed after search film.
+See
+https://kinopoiskapiunofficial.tech/documentation/api/#/films/get_api_v2_2_films__id_")
+
+(defcustom kinopoisk-film-fields
+  '((id (kinopoiskId filmId))
+    (name (nameRu))
+    (original-name (nameOriginal))
+    (year
+     (year)
+     (if (numberp val) (number-to-string val) val))
+    (rating
+     (rating ratingKinopoisk)
+     (kinopoisk--into-film-rating val))
+    (poster-url (posterUrl))
+    (length (filmLength) (kinopoisk--into-film-length val))
+    (countries
+     (countries)
+     (kinopoisk--from-film-countries-of-json val))
+    (slogan (slogan))
+    (description (description))
+    (short-description (shortDescription))
+    (rating-age-limits (ratingAgeLimits)))
+  "This define all fields of `kinopoisk-film' and its way to get from JSON.
+This is list in which each element is list from: field's name, keys of JSON, and
+after form.  Second is List of keys of JSON from Kinopoisk API, if some taked
+then take first valid JSON value.  After form is some Elisp code which will
+evaluate after taking from JSON"
+  :group 'kinopoisk
+  :type 'list)
+
+(defun kinopoisk-film-field-symbol (field)
+  "Get symbol of FIELD, FIELD is one of `kinopoisk-film-fields'."
+  (car field))
+
+(defun kinopoisk-film-field-json-keys (field)
+  "Get keys from JSON of FIELD, FIELD is one of `kinopoisk-film-fields'."
+  (-second-item field))
+
+(defun kinopoisk-film-field-after-form (field)
+  "Get after form of FIELD, FIELD is one of `kinopoisk-film-fields'."
+  (if (= (length field) 3) (-last-item field) 'val))
+
+(defun kinopoisk-film-fields-define-functions ()
+  "Define some functions for `kinopoisk-film' which depends on film fields.
+See `kinopoisk-film-fields'."
+  (kinopoisk-define-film-class)
+  (kinopoisk-define-film-from-json))
+
+(defmacro kinopoisk-define-film-class ()
+  "Define `kinopoisk-film' class, using `kinopoisk-film-fields'."
+  `(defclass kinopoisk-film ()
+     ,(--map
+       (kinopoisk--get-class-field it)
+       kinopoisk-film-fields)
+     "Object for films of Kinopoisk API."))
+
+(defun kinopoisk--get-class-field (field)
+  "Get sexp expression of `kinopoisk-film' FIELD (see `kinopoisk-film-fields')."
+  (let* ((symbol (kinopoisk-film-field-symbol field))
+         (initarg (kinopoisk-film-field-initarg field))
+         (accessor (kinopoisk-film-field-accessor symbol)))
+    `(,symbol
+      :initarg ,initarg
+      :accessor ,accessor)))
+
+(defun kinopoisk-film-field-initarg (field)
+  "Get initarg of FIELD, which is one of `kinopoisk-film-fields'."
+  (->>
+   field
+   (kinopoisk-film-field-symbol)
+   (symbol-name)
+   (s-prepend ":")
+   (intern)))
+
+(defun kinopoisk-search-film-field-p (field)
+  "Return t, when FIELD is one of fields which accessed after search film.
+Using `kinopoisk-in-search-film-fields'"
+  (-contains-p kinopoisk-in-search-film-fields field))
+
+(defun kinopoisk-film-field-accessor (field)
+  "Get accessor for FIELD of `kinopoisk-film'."
+  (let ((prefix
+         (if (kinopoisk-search-film-field-p field)
+             "kinopoisk-film-"
+           "kinopoisk-film--")))
+    (->> field (symbol-name) (s-prepend prefix) (intern))))
 
 (defmacro kinopoisk-define-film-field-accessor (field-name)
   "Define field accessor for fild of `kinopoisk-film' with name FIELD-NAME.
@@ -125,33 +192,25 @@ When you use this macros, you should have accessor with followed name:
    (kinopoisk-get-json "/v2.2/films/%s")
    (kinopoisk-film-from-json)))
 
-(defun kinopoisk-film-from-json (obj)
-  "Get `kinopoisk-film' from JSON OBJ."
-  (kinopoisk-film
-   :id (kinopoisk-get-from-json '(kinopoiskId filmId) obj)
-   :name (kinopoisk-get-from-json 'nameRu obj)
-   :original-name (kinopoisk-get-from-json 'nameOriginal obj)
-   :year (kinopoisk-get-from-json 'year obj
-                                  `(if (numberp val)
-                                       (number-to-string val)
-                                     val))
-   :length (kinopoisk-get-from-json 'filmLength obj
-                                    `(kinopoisk--into-film-length val))
-   :poster-url (kinopoisk-get-from-json 'posterUrl obj)
-   :countries (kinopoisk--film-countries-from-json obj)
-   :rating (kinopoisk--film-rating-from-json obj)
-   :slogan (kinopoisk-get-from-json 'slogan obj)
-   :description (kinopoisk-get-from-json 'description obj)
-   :short-description (kinopoisk-get-from-json 'shortDescription obj)
-   :rating-age-limits (kinopoisk-get-from-json 'ratingAgeLimits obj)))
+(defmacro kinopoisk-define-film-from-json ()
+  "Define `kinopoisk-film-from-json' function using `kinopoisk-film-fields'."
+  `(defun kinopoisk-film-from-json (obj)
+     "Get `kinopoisk-film' from JSON OBJ."
+     (kinopoisk-film
+      ,@(--mapcat
+         (kinopoisk--film-field-from-json it)
+         kinopoisk-film-fields))))
 
-(defun kinopoisk--film-rating-from-json (obj)
-  "Get rating of `kinopoisk-film' by JSON OBJ of Kinopoisk API."
-  (-when-let
-      (rating
-       (kinopoisk-get-from-json '(rating ratingKinopoisk) obj))
-    (when (stringp rating) (setq rating (string-to-number rating)))
-    (* 10 rating)))
+(defun kinopoisk--film-field-from-json (field)
+  "Get sexp expression for `kinopoisk-from-id' for FIELD.
+FIELD is one of `kinopoisk-film-fields'.
+One condition is that in function `kinopoisk-from-json' argument of JOSN object
+called `obj'"
+  (let* ((initarg (kinopoisk-film-field-initarg field))
+         (after-form (kinopoisk-film-field-after-form field))
+         (json-keys (kinopoisk-film-field-json-keys field)))
+    `(,initarg
+      (kinopoisk-get-from-json ',json-keys obj ',after-form))))
 
 (defun kinopoisk--into-film-length (from)
   "Try transform FROM to number of minutes, these is length of film.
@@ -170,11 +229,18 @@ Example of STR - 2:16, this is 136 minutes"
        (minutes (string-to-number minutes)))
     (+ (* hours 60) minutes)))
 
-(defun kinopoisk--film-countries-from-json (obj)
-  "Get countries from JSON OBJ of Kinopoisk API."
-  (--map
-   (gethash "country" it)
-   (kinopoisk-get-from-json 'countries obj)))
+(defun kinopoisk--into-film-rating (from)
+  "Get from FROM rating of film, FROM may be one of `number', `string'.
+Rating is number from 0 to 100"
+  (->
+   (cl-typecase from ;nofmt
+     (number from)
+     (string (string-to-number from)))
+   (* 10)))
+
+(defun kinopoisk--from-film-countries-of-json (countries)
+  "Take COUNTRIES as value of film's JSON, return normal list of countries."
+  (--map (gethash "country" it) countries))
 
 (defun kinopoisk-get-json (uri &rest format-options)
   "Get JSON string for URI with formatted FORMAT-OPTIONS of Kinopoisk's API."
@@ -210,6 +276,8 @@ Example of STR - 2:16, this is 136 minutes"
      (buffer-substring (1+ url-http-end-of-headers) (point-max))
      (decode-coding-string it 'utf-8)
      (json-parse-string it))))
+
+(kinopoisk-film-fields-define-functions)
 
 (provide 'kinopoisk)
 
