@@ -37,6 +37,7 @@
   (should (stringp (kinopoisk-film-short-description film)))
   (should (stringp (kinopoisk-film-description film)))
   (should (numberp (kinopoisk-film-length film)))
-  (should (listp (kinopoisk-film-countries film))))
+  (should (listp (kinopoisk-film-countries film)))
+  (should (stringp (kinopoisk-film-web-url film))))
 
 ;;; test-helper.el ends here

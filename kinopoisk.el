@@ -64,6 +64,7 @@ https://kinopoiskapiunofficial.tech/documentation/api/#/films/get_api_v2_2_films
     (rating
      (rating ratingKinopoisk)
      (kinopoisk--into-film-rating val))
+    (web-url (webUrl))
     (poster-url (posterUrl))
     (length (filmLength) (kinopoisk--into-film-length val))
     (countries
@@ -111,7 +112,7 @@ See `kinopoisk-film-fields'."
      (kinopoisk-define-film-field-accessor slogan)
      (kinopoisk-define-film-field-accessor short-description)
      (kinopoisk-define-film-field-accessor rating-age-limits)
-     (kinopoisk-define-film-field-accessor poster-url)))
+     (kinopoisk-define-film-field-accessor web-url)))
 
 (defun kinopoisk--get-class-field (field)
   "Get sexp expression of `kinopoisk-film' FIELD (see `kinopoisk-film-fields')."
