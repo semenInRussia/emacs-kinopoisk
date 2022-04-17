@@ -101,11 +101,17 @@ See `kinopoisk-film-fields'."
 
 (defmacro kinopoisk-define-film-class ()
   "Define `kinopoisk-film' class, using `kinopoisk-film-fields'."
-  `(defclass kinopoisk-film ()
-     ,(--map
-       (kinopoisk--get-class-field it)
-       kinopoisk-film-fields)
-     "Object for films of Kinopoisk API."))
+  `(progn
+     (defclass kinopoisk-film ()
+       ,(--map
+         (kinopoisk--get-class-field it)
+         kinopoisk-film-fields)
+       "Object for films of Kinopoisk API.")
+     (kinopoisk-define-film-field-accessor original-name)
+     (kinopoisk-define-film-field-accessor slogan)
+     (kinopoisk-define-film-field-accessor short-description)
+     (kinopoisk-define-film-field-accessor rating-age-limits)
+     (kinopoisk-define-film-field-accessor poster-url)))
 
 (defun kinopoisk--get-class-field (field)
   "Get sexp expression of `kinopoisk-film' FIELD (see `kinopoisk-film-fields')."
@@ -160,12 +166,6 @@ When you use this macros, you should have accessor with followed name:
            (kinopoisk-film-from-id)
            (,simple-accessor))))
        (,simple-accessor film))))
-
-(kinopoisk-define-film-field-accessor original-name)
-(kinopoisk-define-film-field-accessor slogan)
-(kinopoisk-define-film-field-accessor short-description)
-(kinopoisk-define-film-field-accessor rating-age-limits)
-(kinopoisk-define-film-field-accessor poster-url)
 
 (defun kinopoisk-search-one-film (query)
   "Search one `kinopoisk-film' in Kinopoisk API, which best match with QUERY."
