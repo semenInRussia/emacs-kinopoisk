@@ -51,13 +51,17 @@ git clone https://github.com/semenInRussia/emacs-kinopoisk.git
 Main object of these Elisp package is `kinopoisk-film`, for find a
 film from id, use the followed code:
 
+#### Kinopoisk Get From ID
+
 ```elisp
 ;; 301 is ID of film `The Matrix' on Kinopooisk
 (kinopoisk-film-from-id 301)
 ```
 
-If you need to get a info from a `kinopoisk-film`, then use
-the followed functions:
+#### Kinopoisk Film Fields
+
+If you need to get a info from a `kinopoisk-film`, then use the
+followed functions:
 
 * `kinopoisk-film-year` (the type is string)
 * `kinopoisk-film-countries` (the type is list of string, list of
@@ -78,9 +82,12 @@ in film)
 * `kinopoisk-film-is-serial-p` (the type is boolean, `t` when film is
   seral)
 
+#### Open Film's Web Page in Browser
+
 If you need to open web page of film in web browser, use function
 `kinopoisk-film-open-in-web`
 
+#### Film's Videos
 If you need to see trailers of a film use function
 `kinopoisk-film-videos`, this function return list of
 `kinopoisk-film-video` objects, each film video has attributes `name`,
@@ -93,6 +100,23 @@ If you need to see trailers of a film use function
 If you need to open film video use function
 `kinopoisk-film-video-open-in-web`
 
+#### Film's Top
+
+If you need to see film's top use function `kinopoisk-get-films-top`,
+the first argument is type of top.  It is one of followed symbols:
+
+- `best`. default
+- `popular`
+- `await`
+
+The second argument is page (number), `kinopoisk-get-films-top` return
+20 films, so if you need to take other 20 films use followed code:
+
+```elisp
+;; `nil' mean choose default value
+(kinopoisk-get-films-top nil 2)
+```
+
 ### Usage of `helm-kinopoisk`
 Now `helm-kinopoisk` have only one interactive function
 `helm-kinopoisk-search-films` with followed HELM actions:
@@ -103,7 +127,7 @@ Now `helm-kinopoisk` have only one interactive function
 ## Contributing
 
 Yes, please do! See [CONTRIBUTING][] for guidelines.
-    
+
 ## License
 
 See [COPYING][]. Copyright (c) 2022 Semen Khramtsov.

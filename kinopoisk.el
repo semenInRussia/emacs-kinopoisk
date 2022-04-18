@@ -48,6 +48,22 @@
   :group 'kinopoisk
   :type 'string)
 
+(defcustom kinopoisk-types-of-top
+  '(best popular await)
+  "Types of top, for get top use `kinopoisk-get-films-top'."
+  :group 'kinopoisk
+  :type 'string)
+
+(defcustom kinopoisk-default-type-of-top
+  'best
+  "Defalt type of top, for get top use `kinopoisk-get-films-top'.
+One of `kinopoisk-types-of-top'."
+  :group 'kinopoisk
+  :type '(radio
+          (const :tag "Top 250 Best Films" best)
+          (const :tag "Top 100 Popular Films" popular)
+          (const :tag "Top Await Films" await)))
+
 (defcustom kinopoisk-in-search-film-fields
   '(id name description year length countries rating poster-url)
   "Fileds of `kinopoisk-film' which will accessed after search film.
@@ -355,6 +371,35 @@ Rating is number from 0 to 100"
    :name (kinopoisk-get-from-json 'name obj)
    :url (kinopoisk-get-from-json 'url obj)
    :site (kinopoisk-get-from-json 'site obj)))
+
+(defun kinopoisk-get-films-top (&optional type page)
+  "Get top with type TYPE of films (`kinopoisk-film') from Kinopoisk.
+Return 20 `kinopoisk-film'.  If PAGE is non-nil then return PAGE-th top.  TYPE
+is one of `kinopoisk-types-of-top'.  TYPE defaults to
+`kinopoisk-default-type-of-top'"
+  (->>
+   (kinopoisk--format-url-of-films-top type page)
+   (kinopoisk-get-json)
+   (kinopoisk-get-from-json 'films)
+   (-map #'kinopoisk-film-from-json)))
+
+(defun kinopoisk--format-url-of-films-top (&optional type page)
+  "Get url for get top of films, on page PAGE and with TYPE."
+  (or type (setq type kinopoisk-default-type-of-top))
+  (or page (setq page 1))
+  (format
+   "/v2.2/films/top?page=%s&type=%s"
+   page
+   (kinopoisk--get-type-of-top-full-name type)))
+
+(defun kinopoisk--get-type-of-top-full-name (type)
+  "Get full name of TYPE of films top.
+TYPE is one of `kinopoisk-types-of-top'.  TYPE defaults to
+`kinopoisk-default-type-of-top'"
+  (cl-case type
+    (best "TOP_250_BEST_FILMS")
+    (popular "TOP_100_POPULAR_FILMS")
+    (await "TOP_AWAIT_FILMS")))
 
 (provide 'kinopoisk)
 
