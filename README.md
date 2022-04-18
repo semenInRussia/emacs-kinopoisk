@@ -83,8 +83,8 @@ If you need to open web page of film in web browser, use function
 Now `helm-kinopoisk` have only one interactive function
 `helm-kinopoisk-search-films` with followed HELM actions:
 
-- Just Return
-- Open Web Page of Kinopoisk
+- Copy URL of Web Page on Kinopoisk
+- Open Web Page on Kinopoisk
 ## Contributing
 
 Yes, please do! See [CONTRIBUTING][] for guidelines.

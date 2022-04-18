@@ -286,6 +286,11 @@ Rating is number from 0 to 100"
   "Open FILM in web browser."
   (->> film (kinopoisk-film-web-url) (browse-url)))
 
+(defmethod kinopoisk-film-copy-web-url
+    ((film kinopoisk-film))
+  "Copy Web Url of page on Kinopoisk about FILM."
+  (->> film (kinopoisk-film-web-url) (kill-new)))
+
 (provide 'kinopoisk)
 
 ;;; kinopoisk.el ends here

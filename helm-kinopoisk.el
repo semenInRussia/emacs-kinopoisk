@@ -43,8 +43,8 @@
     (candidates . helm-kinopoisk--search-candidates)
     (volatile)
     (action .
-     (("Just Return "                . identity)
-      ("Open Web Page of Kinopoisk " . kinopoisk-film-open-in-web))))
+     (("Copy URL of Web Page on Kinopoisk" . kinopoisk-film-copy-web-url)
+      ("Open Web Page on Kinopoisk"        . kinopoisk-film-open-in-web))))
   "Source for `helm-kinopoisk-search'.")
 
 (defun helm-kinopoisk--search-candidates ()
