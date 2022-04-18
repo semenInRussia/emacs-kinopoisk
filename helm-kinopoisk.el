@@ -57,9 +57,10 @@
 (defun helm-kinopoisk--format-film-for-display (film)
   "Format `kinopoisk-film' FILM as str for display in `helm'."
   (format
-   "(%s) %s"
+   "(%s) %s %s"
    (kinopoisk-film-year film)
-   (kinopoisk-film-name film)))
+   (kinopoisk-film-name film)
+   (if (kinopoisk-film-is-serial-p film) "[this is serial]" "")))
 
 (defun helm-kinopoisk--film-videos (film)
   "See videos of FILM via `helm'."
