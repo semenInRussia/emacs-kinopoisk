@@ -54,7 +54,7 @@
 See
 https://kinopoiskapiunofficial.tech/documentation/api/#/films/get_api_v2_2_films__id_")
 
-(defcustom kinopoisk-film-fields
+(defcustom kinopoisk-film-basic-fields
   '((id (kinopoiskId filmId))
     (name (nameRu))
     (original-name (nameOriginal))
@@ -82,31 +82,44 @@ evaluate after taking from JSON"
   :group 'kinopoisk
   :type 'list)
 
+(defcustom kinopoisk-film-special-fields
+  '((videos
+     :accessor kinopoisk-film--videos
+     :initform nil
+     :initarg :videos))
+  "Some fields of `kinopoisk-film' which not included to search by ID.
+This is list in which each element is list from car field's name and cdr which
+is options of `defclass' fields defnition"
+  :group 'kinopoisk
+  :type 'list)
+
 (defun kinopoisk-film-field-symbol (field)
-  "Get symbol of FIELD, FIELD is one of `kinopoisk-film-fields'."
+  "Get symbol of FIELD, FIELD is one of `kinopoisk-film-basic-fields'."
   (car field))
 
 (defun kinopoisk-film-field-json-keys (field)
-  "Get keys from JSON of FIELD, FIELD is one of `kinopoisk-film-fields'."
+  "Get keys from JSON of FIELD, FIELD is one of `kinopoisk-film-basic-fields'."
   (-second-item field))
 
 (defun kinopoisk-film-field-after-form (field)
-  "Get after form of FIELD, FIELD is one of `kinopoisk-film-fields'."
+  "Get after form of FIELD, FIELD is one of `kinopoisk-film-basic-fields'."
   (if (= (length field) 3) (-last-item field) 'val))
 
-(defun kinopoisk-film-fields-define-functions ()
+(defun kinopoisk-film-basic-fields-define-functions ()
   "Define some functions for `kinopoisk-film' which depends on film fields.
-See `kinopoisk-film-fields'."
+See `kinopoisk-film-basic-fields'."
   (kinopoisk-define-film-class)
   (kinopoisk-define-film-from-json))
 
 (defmacro kinopoisk-define-film-class ()
-  "Define `kinopoisk-film' class, using `kinopoisk-film-fields'."
+  "Define `kinopoisk-film' class, using `kinopoisk-film-basic-fields'."
   `(progn
      (defclass kinopoisk-film ()
-       ,(--map
-         (kinopoisk--get-class-field it)
-         kinopoisk-film-fields)
+       ,(-concat
+         (--map
+          (kinopoisk--get-class-field it)
+          kinopoisk-film-basic-fields)
+         kinopoisk-film-special-fields)
        "Object for films of Kinopoisk API.")
      (kinopoisk-define-film-field-accessor original-name)
      (kinopoisk-define-film-field-accessor slogan)
@@ -115,7 +128,8 @@ See `kinopoisk-film-fields'."
      (kinopoisk-define-film-field-accessor web-url)))
 
 (defun kinopoisk--get-class-field (field)
-  "Get sexp expression of `kinopoisk-film' FIELD (see `kinopoisk-film-fields')."
+  "Get sexp expression of `kinopoisk-film' FIELD.
+See `kinopoisk-film-basic-fields'."
   (let* ((symbol (kinopoisk-film-field-symbol field))
          (initarg (kinopoisk-film-field-initarg field))
          (accessor (kinopoisk-film-field-accessor symbol)))
@@ -124,7 +138,7 @@ See `kinopoisk-film-fields'."
       :accessor ,accessor)))
 
 (defun kinopoisk-film-field-initarg (field)
-  "Get initarg of FIELD, which is one of `kinopoisk-film-fields'."
+  "Get initarg of FIELD, which is one of `kinopoisk-film-basic-fields'."
   (->>
    field
    (kinopoisk-film-field-symbol)
@@ -195,17 +209,17 @@ When you use this macros, you should have accessor with followed name:
    (kinopoisk-film-from-json)))
 
 (defmacro kinopoisk-define-film-from-json ()
-  "Define `kinopoisk-film-from-json' function using `kinopoisk-film-fields'."
+  "Define `kinopoisk-film-from-json' function using `kinopoisk-film-basic-fields'."
   `(defun kinopoisk-film-from-json (obj)
      "Get `kinopoisk-film' from JSON OBJ."
      (kinopoisk-film
       ,@(--mapcat
          (kinopoisk--film-field-from-json it)
-         kinopoisk-film-fields))))
+         kinopoisk-film-basic-fields))))
 
 (defun kinopoisk--film-field-from-json (field)
   "Get sexp expression for `kinopoisk-from-id' for FIELD.
-FIELD is one of `kinopoisk-film-fields'.
+FIELD is one of `kinopoisk-film-basic-fields'.
 One condition is that in function `kinopoisk-from-json' argument of JOSN object
 called `obj'"
   (let* ((initarg (kinopoisk-film-field-initarg field))
@@ -279,7 +293,7 @@ Rating is number from 0 to 100"
      (decode-coding-string it 'utf-8)
      (json-parse-string it))))
 
-(kinopoisk-film-fields-define-functions)
+(kinopoisk-film-basic-fields-define-functions)
 
 (defmethod kinopoisk-film-open-in-web
     ((film kinopoisk-film))
@@ -306,7 +320,16 @@ Rating is number from 0 to 100"
 
 (defmethod kinopoisk-film-videos
     ((film kinopoisk-film))
-  "Get videos for FILM (trailers and etc.)."
+  "Get videos (`kinopoisk-film-video') of FILM (trailers and etc.)."
+  (or
+   (kinopoisk-film--videos film)
+   (setf
+    (kinopoisk-film--videos film)
+    (kinopoisk--search-videos-of-film film))))
+
+(defmethod kinopoisk--search-videos-of-film
+    ((film kinopoisk-film))
+  "Search videos (`kinopoisk-film-video') for FILM (trailers and etc.)."
   (->>
    film
    (kinopoisk-film-id)
