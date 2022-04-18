@@ -73,8 +73,10 @@ in film)
 * `kinopoisk-film-slogan` (the type is string)
 * `kinopoisk-film-description` (the type is string)
 * `kinopoisk-film-short-description` (the type is string)
-* `kinopoisk-film-rating-age-limits` (the type is string, for
-  example: "age16")
+* `kinopoisk-film-rating-age-limits` (the type is string, for example:
+"age16")
+* `kinopoisk-film-is-serial-p` (the type is boolean, `t` when film is
+  seral)
 
 If you need to open web page of film in web browser, use function
 `kinopoisk-film-open-in-web`
@@ -101,7 +103,7 @@ Now `helm-kinopoisk` have only one interactive function
 ## Contributing
 
 Yes, please do! See [CONTRIBUTING][] for guidelines.
-
+    
 ## License
 
 See [COPYING][]. Copyright (c) 2022 Semen Khramtsov.

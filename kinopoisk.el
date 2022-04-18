@@ -73,6 +73,7 @@ https://kinopoiskapiunofficial.tech/documentation/api/#/films/get_api_v2_2_films
     (slogan (slogan))
     (description (description))
     (short-description (shortDescription))
+    (is-serial (serial))
     (rating-age-limits (ratingAgeLimits)))
   "This define all fields of `kinopoisk-film' and its way to get from JSON.
 This is list in which each element is list from: field's name, keys of JSON, and
@@ -125,7 +126,9 @@ See `kinopoisk-film-basic-fields'."
      (kinopoisk-define-film-field-accessor slogan)
      (kinopoisk-define-film-field-accessor short-description)
      (kinopoisk-define-film-field-accessor rating-age-limits)
-     (kinopoisk-define-film-field-accessor web-url)))
+     (kinopoisk-define-film-field-accessor web-url)
+     (kinopoisk-define-film-field-accessor is-serial
+                                           kinopoisk-film-is-serial-p)))
 
 (defun kinopoisk--get-class-field (field)
   "Get sexp expression of `kinopoisk-film' FIELD.
@@ -159,16 +162,19 @@ Using `kinopoisk-in-search-film-fields'"
            "kinopoisk-film--")))
     (->> field (symbol-name) (s-prepend prefix) (intern))))
 
-(defmacro kinopoisk-define-film-field-accessor (field-name)
-  "Define field accessor for fild of `kinopoisk-film' with name FIELD-NAME.
-Take value of FIELD-NAME from result of `kinopoisk-film-from-id'.
-When you use this macros, you should have accessor with followed name:
+(defmacro kinopoisk-define-film-field-accessor (field-name &optional accessor)
+  "Define field accessor for field with name FIELD-NAME of `kinopoisk-film'.
+If ACCESSOR is symbol, then name of function-accessor will be ACCESSOR.  Take
+value of FIELD-NAME from result of `kinopoisk-film-from-id'.  When you use this
+macros, you should have accessor with followed name:
 `kinopoisk-film--<field-name>' (instead of <field-name> put FIELD-NAME)"
   (let* ((field-name-str (symbol-name field-name))
          (simple-accessor
           (intern (s-concat "kinopoisk-film--" field-name-str)))
          (accessor
-          (intern (s-concat "kinopoisk-film-" field-name-str))))
+          (or
+           accessor
+           (intern (s-concat "kinopoisk-film-" field-name-str)))))
     `(defmethod ,accessor
          ((film kinopoisk-film))
        ,(s-lex-format "Get `${field-name-str}' of FILM.")
@@ -283,6 +289,7 @@ Rating is number from 0 to 100"
           (--first (kinopoisk-get-from-json it obj) key)
           obj)))
     (unless (eq it :null) it)
+    (if (eq it :false) t it)
     (eval form `((val . ,it)))))
 
 (defun kinopoisk--json-from-buffer (buffer)
