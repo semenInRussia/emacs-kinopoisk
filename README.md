@@ -88,12 +88,16 @@ If you need to see trailers of a film use function
 - `kinopoisk-film-video-site`
 - `kinopoisk-film-video-name`
 
+If you need to open film video use function
+`kinopoisk-film-video-open-in-web`
+
 ### Usage of `helm-kinopoisk`
 Now `helm-kinopoisk` have only one interactive function
 `helm-kinopoisk-search-films` with followed HELM actions:
 
 - Copy URL of Web Page on Kinopoisk
 - Open Web Page on Kinopoisk
+- See Videos about Film
 ## Contributing
 
 Yes, please do! See [CONTRIBUTING][] for guidelines.
