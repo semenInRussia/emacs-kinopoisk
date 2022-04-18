@@ -70,6 +70,7 @@ https://kinopoiskapiunofficial.tech/documentation/api/#/films/get_api_v2_2_films
     (countries
      (countries)
      (kinopoisk--from-film-countries-of-json val))
+    (genres (genres) (kinopoisk--from-film-genres-of-json val))
     (slogan (slogan))
     (description (description))
     (short-description (shortDescription))
@@ -125,6 +126,7 @@ See `kinopoisk-film-basic-fields'."
      (kinopoisk-define-film-field-accessor original-name)
      (kinopoisk-define-film-field-accessor slogan)
      (kinopoisk-define-film-field-accessor short-description)
+     (kinopoisk-define-film-field-accessor genres)
      (kinopoisk-define-film-field-accessor rating-age-limits)
      (kinopoisk-define-film-field-accessor web-url)
      (kinopoisk-define-film-field-accessor is-serial
@@ -263,6 +265,10 @@ Rating is number from 0 to 100"
 (defun kinopoisk--from-film-countries-of-json (countries)
   "Take COUNTRIES as value of film's JSON, return normal list of countries."
   (--map (gethash "country" it) countries))
+
+(defun kinopoisk--from-film-genres-of-json (genres)
+  "Take GENRES as value of film's JSON, return normal list of genres."
+  (--map (gethash "genre" it) genres))
 
 (defun kinopoisk-get-json (uri &rest format-options)
   "Get JSON string for URI with formatted FORMAT-OPTIONS of Kinopoisk's API."
