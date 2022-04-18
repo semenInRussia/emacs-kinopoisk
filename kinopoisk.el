@@ -281,6 +281,11 @@ Rating is number from 0 to 100"
 
 (kinopoisk-film-fields-define-functions)
 
+(defmethod kinopoisk-film-open-in-web
+    ((film kinopoisk-film))
+  "Open FILM in web browser."
+  (->> film (kinopoisk-film-web-url) (browse-url)))
+
 (provide 'kinopoisk)
 
 ;;; kinopoisk.el ends here
