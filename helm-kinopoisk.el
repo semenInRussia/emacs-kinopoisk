@@ -44,7 +44,8 @@
     (volatile)
     (action .
      (("Copy URL of Web Page on Kinopoisk" . kinopoisk-film-copy-web-url)
-      ("Open Web Page on Kinopoisk"        . kinopoisk-film-open-in-web))))
+      ("Open Web Page on Kinopoisk"        . kinopoisk-film-open-in-web)
+      ("See Videos about Film"             . helm-kinopoisk--film-videos))))
   "Source for `helm-kinopoisk-search'.")
 
 (defun helm-kinopoisk--search-candidates ()
@@ -59,6 +60,26 @@
    "(%s) %s"
    (kinopoisk-film-year film)
    (kinopoisk-film-name film)))
+
+(defun helm-kinopoisk--film-videos (film)
+  "See videos of FILM via `helm'."
+  (let ((source-name
+         (format
+          "HELM Videos of Film \"%s\""
+          (kinopoisk-film-name film)))
+        (candidates (helm-kinopoisk--film-videos-candidates film)))
+    (helm
+     :sources ;nofmt
+     `((name . ,source-name)
+       (candidates . ,candidates)
+       (action . (("See Video" . kinopoisk-film-video-open-in-web)))))))
+
+(defun helm-kinopoisk--film-videos-candidates (film)
+  "Return candidates for see videos of `kinopoisk-film' FILM via `helm'."
+  (->>
+   film
+   (kinopoisk-film-videos)
+   (--map (cons (kinopoisk-film-video-name it) it))))
 
 (defun helm-kinopoisk-search-films ()
   "Search films from Kinopoisk via `helm'."
