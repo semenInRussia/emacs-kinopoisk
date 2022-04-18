@@ -289,7 +289,8 @@ Rating is number from 0 to 100"
           (--first (kinopoisk-get-from-json it obj) key)
           obj)))
     (unless (eq it :null) it)
-    (if (eq it :false) t it)
+    (if (eq it :false) nil it)
+    (if (eq it :true) t it)
     (eval form `((val . ,it)))))
 
 (defun kinopoisk--json-from-buffer (buffer)
