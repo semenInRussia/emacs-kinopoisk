@@ -6,7 +6,7 @@ API of [kinopoisk](https://en.wikipedia.org/wiki/Kinopoisk "Link to Wikipedia Ar
 
 _NOTE:_ `MELPA` haven't `emacs-kinopoisk` yet
 
-If you need to use `emacs-kinopoisk` in other repo, then: 
+If you need to use `emacs-kinopoisk` in other repo, then:
 
 1. Clone to the root directory of your project
 
@@ -38,7 +38,7 @@ git clone https://github.com/semenInRussia/emacs-kinopoisk.git
 
 2. If you use [use-package](https://github.com/jwiegley/use-package "a
    Link to the Cool Repo"), the use followed code:
-   
+
    ```elisp
 (use-package helm-kinopoisk
     ;; Change the next line if you use a other folder for save the
@@ -79,7 +79,16 @@ in film)
 If you need to open web page of film in web browser, use function
 `kinopoisk-film-open-in-web`
 
-### Usage of `kinopoisk`
+If you need to see trailers of a film use function
+`kinopoisk-film-videos`, this function return list of
+`kinopoisk-film-video` objects, each film video has attributes `name`,
+`url` and `site`, so `kinopoisk-film-video` has followed methods:
+
+- `kinopoisk-film-video-url`
+- `kinopoisk-film-video-site`
+- `kinopoisk-film-video-name`
+
+### Usage of `helm-kinopoisk`
 Now `helm-kinopoisk` have only one interactive function
 `helm-kinopoisk-search-films` with followed HELM actions:
 

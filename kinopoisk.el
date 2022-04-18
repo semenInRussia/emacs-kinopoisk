@@ -291,6 +291,29 @@ Rating is number from 0 to 100"
   "Copy Web Url of page on Kinopoisk about FILM."
   (->> film (kinopoisk-film-web-url) (kill-new)))
 
+(defclass kinopoisk-film-video ()
+  ((name :initarg :name :accessor kinopoisk-film-video-name)
+   (site :initarg :site :accessor kinopoisk-film-video-site)
+   (url :initarg :url :accessor kinopoisk-film-video-url))
+  "Video for film, for get use `kinopoisk-film-videos'")
+
+(defun kinopoisk-film-video-from-json (obj)
+  "Get from JSON OBJ of Kinopoisk API `kinopoisk-film-video'."
+  (kinopoisk-film-video
+   :name (kinopoisk-get-from-json 'name obj)
+   :url (kinopoisk-get-from-json 'url obj)
+   :site (kinopoisk-get-from-json 'site obj)))
+
+(defmethod kinopoisk-film-videos
+    ((film kinopoisk-film))
+  "Get videos for FILM (trailers and etc.)."
+  (->>
+   film
+   (kinopoisk-film-id)
+   (kinopoisk-get-json "/v2.2/films/%s/videos")
+   (kinopoisk-get-from-json 'items)
+   (-map #'kinopoisk-film-video-from-json)))
+
 (provide 'kinopoisk)
 
 ;;; kinopoisk.el ends here
