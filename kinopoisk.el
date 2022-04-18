@@ -305,19 +305,6 @@ Rating is number from 0 to 100"
   "Copy Web Url of page on Kinopoisk about FILM."
   (->> film (kinopoisk-film-web-url) (kill-new)))
 
-(defclass kinopoisk-film-video ()
-  ((name :initarg :name :accessor kinopoisk-film-video-name)
-   (site :initarg :site :accessor kinopoisk-film-video-site)
-   (url :initarg :url :accessor kinopoisk-film-video-url))
-  "Video for film, for get use `kinopoisk-film-videos'")
-
-(defun kinopoisk-film-video-from-json (obj)
-  "Get from JSON OBJ of Kinopoisk API `kinopoisk-film-video'."
-  (kinopoisk-film-video
-   :name (kinopoisk-get-from-json 'name obj)
-   :url (kinopoisk-get-from-json 'url obj)
-   :site (kinopoisk-get-from-json 'site obj)))
-
 (defmethod kinopoisk-film-videos
     ((film kinopoisk-film))
   "Get videos (`kinopoisk-film-video') of FILM (trailers and etc.)."
@@ -326,6 +313,17 @@ Rating is number from 0 to 100"
    (setf
     (kinopoisk-film--videos film)
     (kinopoisk--search-videos-of-film film))))
+
+(defclass kinopoisk-film-video ()
+  ((name :initarg :name :accessor kinopoisk-film-video-name)
+   (site :initarg :site :accessor kinopoisk-film-video-site)
+   (url :initarg :url :accessor kinopoisk-film-video-url))
+  "Video for film, for get use `kinopoisk-film-videos'")
+
+(defmethod kinopoisk-film-video-open-in-web
+    ((video kinopoisk-film-video))
+  "Open VIDEO in Web Browser."
+  (->> video (kinopoisk-film-video-url) (browse-url)))
 
 (defmethod kinopoisk--search-videos-of-film
     ((film kinopoisk-film))
@@ -336,6 +334,13 @@ Rating is number from 0 to 100"
    (kinopoisk-get-json "/v2.2/films/%s/videos")
    (kinopoisk-get-from-json 'items)
    (-map #'kinopoisk-film-video-from-json)))
+
+(defun kinopoisk-film-video-from-json (obj)
+  "Get from JSON OBJ of Kinopoisk API `kinopoisk-film-video'."
+  (kinopoisk-film-video
+   :name (kinopoisk-get-from-json 'name obj)
+   :url (kinopoisk-get-from-json 'url obj)
+   :site (kinopoisk-get-from-json 'site obj)))
 
 (provide 'kinopoisk)
 
