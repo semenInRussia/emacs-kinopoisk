@@ -35,18 +35,44 @@
 (require 's)
 
 (defgroup helm-kinopoisk nil
-  "Wrapper of `kinopoisk' for `helm'."
-  :group 'tools)
+  "Support of `helm' for `kinopoisk'."
+  :group 'tools
+  :prefix 'helm-kinopoisk-)
+
+(defcustom helm-kinopoisk-search-actions
+  '(("Choose Action"                 . helm-kinopoisk--handle-film)
+    ("Copy URL of Page on Kinopoisk" . kinopoisk-film-copy-web-url)
+    ("Open Web Page on Kinopoisk"    . kinopoisk-film-open-in-web)
+    ("See Videos about Film"         . helm-kinopoisk--film-videos))
+  "Actions for `helm-kinopoisk-search'."
+  :group 'helm-kinopoisk
+  :type '(alist :key-type string :value-type symbol-function))
 
 (defvar helm-kinonpoisk-source
-  '((name . "HELM Kinopoisk")
+  `((name . "HELM Kinopoisk")
     (candidates . helm-kinopoisk--search-candidates)
     (volatile)
-    (action .
-     (("Copy URL of Web Page on Kinopoisk" . kinopoisk-film-copy-web-url)
-      ("Open Web Page on Kinopoisk"        . kinopoisk-film-open-in-web)
-      ("See Videos about Film"             . helm-kinopoisk--film-videos))))
+    (action . ,helm-kinopoisk-search-actions))
   "Source for `helm-kinopoisk-search'.")
+
+(defun helm-kinopoisk--handle-film (film)
+  "Do any `helm' action with FILM (`kinopoisk-film')."
+  (funcall (helm-kinopoisk--choose-search-action) film))
+
+(defun helm-kinopoisk--choose-search-action ()
+  "Choose one of `helm-kinopoisk-search-actions', ignoring first."
+  (let ((action-name
+         (->>
+          helm-kinopoisk-search-actions
+          (cdr)
+          (completing-read
+           "Choose one of this action for `kinopoisk-search'."))))
+    (alist-get
+     action-name
+     helm-kinopoisk-search-actions
+     nil
+     nil
+     #'string-equal)))
 
 (defun helm-kinopoisk--search-candidates ()
   "Search candidates for `helm-kinopoisk-search'."
