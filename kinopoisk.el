@@ -401,6 +401,13 @@ TYPE is one of `kinopoisk-types-of-top'.  TYPE defaults to
     (popular "TOP_100_POPULAR_FILMS")
     (await "TOP_AWAIT_FILMS")))
 
+(defun kinopoisk-format-type-of-top (type)
+  "Format TYPE to humanize string."
+  (cl-case type
+    (best "Top of 250 best films")
+    (popular "Top 100 Popular Films")
+    (await "Top Await Films")))
+
 (provide 'kinopoisk)
 
 ;;; kinopoisk.el ends here
