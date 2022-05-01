@@ -24,7 +24,8 @@
 
 ;;; Commentary:
 
-;; API of `kinopoisk` (cinema-service) for Emacs Lisp
+;; API of `kinopoisk` (cinema-service) for Emacs Lisp.  NOTE, that some
+;; functions different from original Web API of Kinopoisk.
 
 ;;; Code:
 
@@ -381,7 +382,7 @@ See function `kinopoisk-get-nth-film-of-top'"
 (defun kinopoisk-get-nth-film-of-top (n &optional type)
   "Get Nth film of top with type TYPE, without see to cash.
 See `kinopoisk-get-films-top'"
-  (let* ((page (1+ (/ n kinopoisk--films-of-top-per-page)))
+  (let* ((page (/ n kinopoisk--films-of-top-per-page))
          (n-on-page (% n kinopoisk--films-of-top-per-page))
          (films-of-page (kinopoisk-get-films-top type page)))
     (nth n-on-page films-of-page)))
@@ -398,9 +399,13 @@ is one of `kinopoisk-types-of-top'.  TYPE defaults to
    (-map #'kinopoisk-film-from-json)))
 
 (defun kinopoisk--format-url-of-films-top (&optional type page)
-  "Get url for get top of films, on page PAGE and with TYPE."
+  "Get url for get top of films, on page PAGE and with TYPE.
+
+Note, that in original Kinopoisk API minimal page is 1, but this isn't
+convinence, so PAGE will automatically increment"
   (or type (setq type kinopoisk-default-type-of-top))
-  (or page (setq page 1))
+  (or page (setq page 0))
+  (incf page)
   (format
    "/v2.2/films/top?page=%s&type=%s"
    page
@@ -421,6 +426,12 @@ TYPE is one of `kinopoisk-types-of-top'.  TYPE defaults to
     (best "Top of 250 best films")
     (popular "Top 100 Popular Films")
     (await "Top Await Films")))
+
+(defun kinopoisk-extend-films-top (top &optional type)
+  "Add to TOP with TYPE some next films of top and return extended TOP.
+See `kinopoisk-get-films-top'.  Note, that this function is pure."
+  (let ((page (/ (length top) kinopoisk--films-of-top-per-page)))
+    (append top (kinopoisk-get-films-top type page))))
 
 (provide 'kinopoisk)
 
