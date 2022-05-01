@@ -372,6 +372,20 @@ Rating is number from 0 to 100"
    :url (kinopoisk-get-from-json 'url obj)
    :site (kinopoisk-get-from-json 'site obj)))
 
+(defcustom kinopoisk--films-of-top-per-page 20
+  "Number of films a one page of Kinopoisk top.
+See function `kinopoisk-get-nth-film-of-top'"
+  :group 'kinopoisk
+  :type 'number)
+
+(defun kinopoisk-get-nth-film-of-top (n &optional type)
+  "Get Nth film of top with type TYPE, without see to cash.
+See `kinopoisk-get-films-top'"
+  (let* ((page (1+ (/ n kinopoisk--films-of-top-per-page)))
+         (n-on-page (% n kinopoisk--films-of-top-per-page))
+         (films-of-page (kinopoisk-get-films-top type page)))
+    (nth n-on-page films-of-page)))
+
 (defun kinopoisk-get-films-top (&optional type page)
   "Get top with type TYPE of films (`kinopoisk-film') from Kinopoisk.
 Return 20 `kinopoisk-film'.  If PAGE is non-nil then return PAGE-th top.  TYPE
