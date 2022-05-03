@@ -5,7 +5,7 @@
 ;; Author: Semen Khramtsov <hrams205@gmail.com>
 ;; Version: 0.1
 
-;; Package-Requires: ((emacs "27.1") (helm "0.0.0") (dash "2.18.0") (s "1.12.0") (kinopoisk "0.1"))
+;; Package-Requires: ((emacs "27.1") (helm "0.0.0") (dash "2.18.0") (s "1.12.0"))
 
 ;; Homepage: https://github.com/semenInRussia/emacs-kinopoisk
 
@@ -39,7 +39,7 @@
   :group 'tools
   :prefix 'helm-kinopoisk-)
 
-(defcustom helm-kinopoisk-search-actions
+(defcustom helm-kinopoisk-film-actions
   '(("Choose Action"                 . helm-kinopoisk--handle-film)
     ("Copy URL of Page on Kinopoisk" . kinopoisk-film-copy-web-url)
     ("Open Web Page on Kinopoisk"    . kinopoisk-film-open-in-web)
@@ -48,11 +48,11 @@
   :group 'helm-kinopoisk
   :type '(alist :key-type string :value-type symbol-function))
 
-(defvar helm-kinonpoisk-source
+(defvar helm-kinonpoisk-search-source
   `((name . "HELM Kinopoisk")
     (candidates . helm-kinopoisk--search-candidates)
     (volatile)
-    (action . ,helm-kinopoisk-search-actions))
+    (action . ,helm-kinopoisk-film-actions))
   "Source for `helm-kinopoisk-search'.")
 
 (defun helm-kinopoisk--handle-film (film)
@@ -60,16 +60,16 @@
   (funcall (helm-kinopoisk--choose-search-action) film))
 
 (defun helm-kinopoisk--choose-search-action ()
-  "Choose one of `helm-kinopoisk-search-actions', ignoring first."
+  "Choose one of `helm-kinopoisk-film-actions', ignoring first."
   (let ((action-name
          (->>
-          helm-kinopoisk-search-actions
+          helm-kinopoisk-film-actions
           (cdr)
           (completing-read
            "Choose one of this action for `kinopoisk-search'."))))
     (alist-get
      action-name
-     helm-kinopoisk-search-actions
+     helm-kinopoisk-film-actions
      nil
      nil
      #'string-equal)))
@@ -83,10 +83,9 @@
 (defun helm-kinopoisk--format-film-for-display (film)
   "Format `kinopoisk-film' FILM as str for display in `helm'."
   (format
-   "(%s) %s %s"
+   "(%s) %s"
    (kinopoisk-film-year film)
-   (kinopoisk-film-name film)
-   (if (kinopoisk-film-is-serial-p film) "[this is serial]" "")))
+   (kinopoisk-film-name film)))
 
 (defun helm-kinopoisk--film-videos (film)
   "See videos of FILM via `helm'."
@@ -111,7 +110,75 @@
 (defun helm-kinopoisk-search-films ()
   "Search films from Kinopoisk via `helm'."
   (interactive)
-  (helm :sources '(helm-kinonpoisk-source)))
+  (helm :sources '(helm-kinonpoisk-search-source)))
+
+(defvar helm-kinopoisk-see-films-top--type nil
+  "Type of films top from Kinopoisk.
+See `kinopoisk-get-films-top'")
+
+(defvar helm-kinopoisk-see-films-top-source
+  `((name                   . "HELM Kinopoisk Top of Films")
+    (candidates             . helm-kinopoisk-see-films-top--candidates)
+    (action                 . ,helm-kinopoisk-film-actions)
+    (cleanup                . helm-kinopoisk-see-films-top--cleanup)
+    (init                   . helm-kinopoisk-see-films-top--init)
+    (candidate-number-limit . 250)))
+
+(defun helm-kinopoisk-see-films-top (type)
+  "See top of films from Kinopoisk with type TYPE via `helm'."
+  (interactive (list (helm-kinopoisk-read-type-of-top)))
+  (let ((helm-kinopoisk-see-films-top--type type))
+    (helm :sources '(helm-kinopoisk-see-films-top-source))))
+
+(defun helm-kinopoisk-read-type-of-top ()
+  "Read from user type of Kinopoisk films top.
+One of `kinopoisk-types-of-top'."
+  (let ((candidates
+         (->>
+          kinopoisk-types-of-top
+          (--map (cons (kinopoisk-format-type-of-top it) it)))))
+    (helm
+     :sources ;nofmt
+     `((name . "HELM Kinopoisk Type of Top")
+       (candidates . ,candidates)
+       (action . (("Choose" . identity)))))))
+
+(defvar helm-kinopoisk--films-of-top nil
+  "Already found films of Kinopoisk film, see `kinopoisk-get-films-top'.")
+
+(defun helm-kinopoisk-see-films-top--candidates ()
+  "Get helm candidates for `helm-kinopoisk-see-films-top'."
+  (helm-kinopoisk-see-films-top--update)
+  (--map
+   (cons (helm-kinopoisk--format-film-for-display it) it)
+   helm-kinopoisk--films-of-top))
+
+(defun helm-kinopoisk-see-films-top--update ()
+  "Update helm candidates for `helm-kinopoisk-see-films-top'."
+  (setq
+   helm-kinopoisk--films-of-top
+   (kinopoisk-extend-films-top
+    helm-kinopoisk--films-of-top helm-kinopoisk-see-films-top--type)))
+
+(defun helm-kinopoisk-see-films-top--init ()
+  "Init for `helm-kinopoisk-see-films-top'."
+  (add-hook
+   'helm-move-selection-after-hook
+   #'helm-kinopoisk-see-films-top--update-sel))
+
+(defun helm-kinopoisk-see-films-top--update-sel ()
+  "Update selection for `helm-kinopoisk-see-films-top'."
+  (when (>=
+         (helm-candidate-number-at-point)
+         (length helm-kinopoisk--films-of-top))
+    (helm-force-update)))
+
+(defun helm-kinopoisk-see-films-top--cleanup ()
+  "Clean up variables and hooks of `helm-kinopoisk-see-films-top'."
+  (setq helm-kinopoisk--films-of-top nil)
+  (remove-hook
+   'helm-move-selection-after-hook
+   #'helm-kinopoisk-see-films-top--update-sel))
 
 (provide 'helm-kinopoisk)
 ;;; helm-kinopoisk.el ends here
