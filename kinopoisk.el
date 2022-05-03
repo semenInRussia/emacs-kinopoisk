@@ -39,8 +39,9 @@
   "API of Kinopoisk (cinema-service)."
   :group 'tools)
 
-(defcustom kinopoisk-api-key "2f48f0fa-4db5-472a-914c-60134675efb1"
-  "API key for Kinopoisk."
+(defcustom kinopoisk-api-key "07e275e8-8050-4fa4-8941-435872876974"
+  "API key for Kinopoisk.
+Visit https://kinopoiskapiunofficial.tech"
   :group 'kinopoisk
   :type 'string)
 
