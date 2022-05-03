@@ -47,6 +47,17 @@ git clone https://github.com/semenInRussia/emacs-kinopoisk.git
    ```
 
 ## Usage
+### Get API Key
+[Kinopoisk API](https://kinopoiskapiunofficial.tech) give free 500
+requests, this is enough, when API Key used by one user, but if 2+
+users use API, then 500 requests too little, so please create account
+on [Kinopoisk API](https://kinopoiskapiunofficial.tech), take API-Key,
+and do followed code:
+
+```elisp
+(setq kinopoisk-api-key "<YOUR API KEY>")
+```
+
 ### Usage of `kinopoisk`
 Main object of these Elisp package is `kinopoisk-film`, for find a
 film from id, use the followed code:
@@ -77,10 +88,10 @@ in film)
 * `kinopoisk-film-slogan` (the type is string)
 * `kinopoisk-film-description` (the type is string)
 * `kinopoisk-film-short-description` (the type is string)
-* `kinopoisk-film-rating-age-limits` (the type is string, for example:
-"age16")
-* `kinopoisk-film-is-serial-p` (the type is boolean, `t` when film is
-  seral)
+* `kinopoisk-film-rating-age-limits`
+(the type is string, for example: "age16")
+* `kinopoisk-film-is-serial-p`
+(the type is boolean, `t` when film is serial)
 
 #### Open Film's Web Page in Browser
 
@@ -88,6 +99,7 @@ If you need to open web page of film in web browser, use function
 `kinopoisk-film-open-in-web`
 
 #### Film's Videos
+
 If you need to see trailers of a film use function
 `kinopoisk-film-videos`, this function return list of
 `kinopoisk-film-video` objects, each film video has attributes `name`,
@@ -105,7 +117,7 @@ If you need to open film video use function
 If you need to see film's top use function `kinopoisk-get-films-top`,
 the first argument is type of top.  It is one of followed symbols:
 
-- `best`. default
+- `best`. Default
 - `popular`
 - `await`
 
@@ -118,14 +130,18 @@ The second argument is page (number), `kinopoisk-get-films-top` return
 ```
 
 ### Usage of `helm-kinopoisk`
-Now `helm-kinopoisk` have only one interactive function
-`helm-kinopoisk-search-films` with followed HELM actions:
+All functions which view films has followed actions:
 
 - Copy URL of Web Page on Kinopoisk
 - Open Web Page on Kinopoisk
 - See Videos about Film
-## Contributing
 
+`helm-kinopoisk-search-films` View list of similar to query films
+
+`helm-kinopoisk-see-films-top` ask type of top (see [Films
+Top][contributing]), then view top of films.
+
+## Contributing
 Yes, please do! See [CONTRIBUTING][] for guidelines.
 
 ## License
