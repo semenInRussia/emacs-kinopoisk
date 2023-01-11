@@ -30,8 +30,10 @@
 
 ;;; Code:
 
-(require 'dash)
 (require 'kinopoisk)
+
+(require 'dash)
+(require 'cl-lib)
 (require 's)
 
 (defgroup helm-kinopoisk nil

@@ -196,7 +196,7 @@ macros, you should have accessor with followed name:
            accessor
            (intern (s-concat "kinopoisk-film-" field-name-str)))))
     `(defmethod ,accessor
-         ((film kinopoisk-film))
+       ((film kinopoisk-film))
        ,(s-lex-format "Get `${field-name-str}' of FILM.")
        (unless (,simple-accessor film)
          (setf
@@ -228,11 +228,12 @@ macros, you should have accessor with followed name:
 
 (defun kinopoisk-film-from-id (id)
   "Get `kinopoisk-film' with ID."
-  (assert (numberp id)) ; No injections
-  (->>
-   id
-   (kinopoisk-get-json "/v2.2/films/%s")
-   (kinopoisk-film-from-json)))
+  (and
+   (numberp id) ; defender from injections
+   (->>
+    id
+    (kinopoisk-get-json "/v2.2/films/%s")
+    (kinopoisk-film-from-json))))
 
 (defmacro kinopoisk-define-film-from-json ()
   "Define `kinopoisk-film-from-json' function using `kinopoisk-film-basic-fields'."
@@ -328,17 +329,17 @@ Rating is number from 0 to 100"
 (kinopoisk-film-basic-fields-define-functions)
 
 (defmethod kinopoisk-film-open-in-web
-    ((film kinopoisk-film))
+  ((film kinopoisk-film))
   "Open FILM in web browser."
   (->> film (kinopoisk-film-web-url) (browse-url)))
 
 (defmethod kinopoisk-film-copy-web-url
-    ((film kinopoisk-film))
+  ((film kinopoisk-film))
   "Copy Web Url of page on Kinopoisk about FILM."
   (->> film (kinopoisk-film-web-url) (kill-new)))
 
 (defmethod kinopoisk-film-videos
-    ((film kinopoisk-film))
+  ((film kinopoisk-film))
   "Get videos (`kinopoisk-film-video') of FILM (trailers and etc.)."
   (or
    (kinopoisk-film--videos film)
@@ -353,12 +354,12 @@ Rating is number from 0 to 100"
   "Video for film, for get use `kinopoisk-film-videos'")
 
 (defmethod kinopoisk-film-video-open-in-web
-    ((video kinopoisk-film-video))
+  ((video kinopoisk-film-video))
   "Open VIDEO in Web Browser."
   (->> video (kinopoisk-film-video-url) (browse-url)))
 
 (defmethod kinopoisk--search-videos-of-film
-    ((film kinopoisk-film))
+  ((film kinopoisk-film))
   "Search videos (`kinopoisk-film-video') for FILM (trailers and etc.)."
   (->>
    film
@@ -406,7 +407,7 @@ Note, that in original Kinopoisk API minimal page is 1, but this isn't
 convinence, so PAGE will automatically increment"
   (or type (setq type kinopoisk-default-type-of-top))
   (or page (setq page 0))
-  (incf page)
+  (cl-incf page)
   (format
    "/v2.2/films/top?page=%s&type=%s"
    page
