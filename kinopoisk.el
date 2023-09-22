@@ -212,7 +212,7 @@ macros, you should have accessor with followed name:
        (,simple-accessor film))))
 
 (defmacro kinopoisk-define-film-class ()
-  "Define `kinopoisk-film' class, using `kinopoisk-film-basic-fields'."
+  "Define symbol `kinopoisk-film' class, using `kinopoisk-film-basic-fields'."
   `(progn
      (defclass kinopoisk-film ()
        ,(-concat
@@ -352,6 +352,13 @@ Rating is number from 0 to 100"
   ((film kinopoisk-film))
   "Open FILM in web browser."
   (->> film (kinopoisk-film-web-url) (browse-url)))
+
+(defun kinopoisk-print-film (film)
+  "Print a `kinopoisk' FILM."
+  (message
+   (concat "Film \""
+           (kinopoisk-film-name film)
+           "\"")))
 
 (cl-defmethod kinopoisk-film-copy-web-url
   ((film kinopoisk-film))
