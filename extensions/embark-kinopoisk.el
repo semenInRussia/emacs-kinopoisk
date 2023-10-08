@@ -7,18 +7,6 @@
 ;; Package-Requires: ((emacs "27.1") (dash "2.18.0") (s "1.12.0"))
 ;; Homepage: https://github.com/semenInRussia/emacs-kinopoisk
 
-;; This file is not part of GNU Emacs.
-
-;; This program is free software: you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -53,23 +41,35 @@
 Note that the cursor should be located before the opening double quote and the
 result is either nil or list where the `car' is symbol \\='kinopoisk-film and
 the second element has the type kinopoisk-film"
-  (and
-   (looking-at "\"")
-   (save-excursion
-     ;; skip opening quote
-     (forward-char 1)
-     (when-let*
-         ((start (point))
-          (end (if (search-forward "\"" nil :noerror)
-                   (1- (point))
-                 (point-max)))
-          (name (buffer-substring-no-properties start end))
-          (film (kinopoisk-search-one-film name)))
-       (-cons* 'kinopoisk-film
-               film
-               start end)))))
+  (save-excursion
+    (when-let*
+        ((_ (looking-at "\""))
+         ;; skip opening quote
+         (_ (not (forward-char 1)))
+         (start (point))
+         (end (if (search-forward "\"" nil :noerror)
+                  (1- (point))
+                (point-max)))
+         (name (buffer-substring-no-properties start end))
+         (film (kinopoisk-search-one-film name)))
+      `(kinopoisk-film ,film
+                       ,start . ,end))))
 
-(add-to-list 'embark-target-finders #'embark-kinopoisk-film)
+;;;###autoload
+(define-minor-mode embark-kinopoisk-mode ()
+  "Support of `embark' for films using Kinopoisk API."
+  :global t
+  (cond
+   (embark-kinopoisk-mode
+    (add-to-list 'embark-target-finders #'embark-kinopoisk-film)
+    (setf (alist-get 'kinopoisk-film embark-keymap-alist)
+          'embark-kinopoisk-film-map))
+   (t
+    (setq embark-target-finders (delete 'embark-kinopoisk-film embark-target-finders))
+    (setq embark-keymap-alist (delete '(kinopoisk-film . embark-kinopoisk-film-map)
+                                      embark-keymap-alist)))))
+
+;; "Black Mirror"
 
 (provide 'embark-kinopoisk)
 ;;; embark-kinopoisk.el ends here
