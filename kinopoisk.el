@@ -1,4 +1,4 @@
-;;; kinopoisk.el --- API of `kinopoisk` (cinema-service) for Emacs Lisp
+;;; kinopoisk.el --- API of `kinopoisk' (cinema-service) for Emacs Lisp
 
 ;; Copyright (C) 2022-2023 Semen Khramtsov
 
@@ -8,17 +8,6 @@
 ;; Homepage: https://github.com/semenInRussia/emacs-kinopoisk
 
 ;; This file is not part of GNU Emacs.
-
-;; This program is free software: you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -467,5 +456,4 @@ See `kinopoisk-get-films-top'.  Note, that this function is pure."
     (append top (kinopoisk-get-films-top type page))))
 
 (provide 'kinopoisk)
-
 ;;; kinopoisk.el ends here
