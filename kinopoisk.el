@@ -354,6 +354,16 @@ Rating is number from 0 to 100"
   "Copy Web Url of page on Kinopoisk about FILM."
   (->> film (kinopoisk-film-web-url) (kill-new)))
 
+(cl-defmethod kinopoisk-film-copy-name
+  ((film kinopoisk-film))
+  "Copy the name of a FILM."
+  (->> film (kinopoisk-film-name) (kill-new)))
+
+(cl-defmethod kinopoisk-film-copy-description
+  ((film kinopoisk-film))
+  "Copy the description of a FILM."
+  (->> film (kinopoisk-film-description) (kill-new)))
+
 (cl-defmethod kinopoisk-film-videos
   ((film kinopoisk-film))
   "Get videos (`kinopoisk-film-video') of FILM (trailers and etc.)."
