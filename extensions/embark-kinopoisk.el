@@ -33,7 +33,11 @@
 (defvar-keymap embark-kinopoisk-film-map
   :doc "Keymap with a few film actions using `kinopoisk'."
   :parent embark-general-map
-  "RET" #'kinopoisk-film-open-in-web)
+  "RET" #'kinopoisk-film-open-in-web
+  "w w" #'kinopoisk-film-copy-web-url
+  "w u" #'kinopoisk-film-copy-web-url
+  "w n" #'kinopoisk-film-copy-name
+  "w d" #'kinopoisk-film-copy-description)
 
 (defun embark-kinopoisk-film ()
   "Target a film at point of the form \"Film Name\".
@@ -56,20 +60,20 @@ the second element has the type kinopoisk-film"
                        ,start . ,end))))
 
 ;;;###autoload
-(define-minor-mode embark-kinopoisk-mode ()
+(define-minor-mode embark-kinopoisk-mode
   "Support of `embark' for films using Kinopoisk API."
   :global t
   (cond
    (embark-kinopoisk-mode
+    ;; enable
     (add-to-list 'embark-target-finders #'embark-kinopoisk-film)
     (setf (alist-get 'kinopoisk-film embark-keymap-alist)
           'embark-kinopoisk-film-map))
    (t
+    ;; disable
     (setq embark-target-finders (delete 'embark-kinopoisk-film embark-target-finders))
     (setq embark-keymap-alist (delete '(kinopoisk-film . embark-kinopoisk-film-map)
                                       embark-keymap-alist)))))
-
-;; "Black Mirror"
 
 (provide 'embark-kinopoisk)
 ;;; embark-kinopoisk.el ends here
