@@ -25,6 +25,7 @@
 (require 'cl-lib)
 (require 's)
 
+
 (defgroup helm-kinopoisk nil
   "Support of `helm' for `kinopoisk'."
   :group 'tools
@@ -100,6 +101,7 @@
    (kinopoisk-film-videos)
    (--map (cons (kinopoisk-film-video-name it) it))))
 
+;;;###autoload
 (defun helm-kinopoisk-search-films ()
   "Search films from Kinopoisk via `helm'."
   (interactive)
@@ -119,6 +121,7 @@ See `kinopoisk-get-films-top'")
     (init                   . helm-kinopoisk-see-films-top--init)
     (candidate-number-limit . 250)))
 
+;;;###autoload
 (defun helm-kinopoisk-see-films-top (type)
   "See top of films from Kinopoisk with type TYPE via `helm'."
   (interactive (list (helm-kinopoisk-read-type-of-top)))
