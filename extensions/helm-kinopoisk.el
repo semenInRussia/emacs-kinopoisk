@@ -5,7 +5,7 @@
 ;; Author: Semen Khramtsov <hrams205@gmail.com>
 ;; Version: 0.1
 
-;; Package-Requires: ((emacs "27.1") (helm "3.9.5") (dash "2.18.0") (s "1.12.0"))
+;; Package-Requires: ((emacs "27.1") (helm-core "3.9.9") (dash "2.18.0") (s "1.12.0"))
 
 ;; Homepage: https://github.com/semenInRussia/emacs-kinopoisk
 
@@ -18,11 +18,10 @@
 
 ;;; Code:
 
-(require 'kinopoisk)
-
-(require 'helm)
-(require 'dash)
 (require 'cl-lib)
+(require 'dash)
+(require 'helm-core)
+(require 'kinopoisk)
 (require 's)
 
 
