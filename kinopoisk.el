@@ -325,6 +325,7 @@ Rating is number from 0 to 100"
     (if (eq it :true) t it)
     (eval form `((val . ,it)))))
 
+(defvar url-http-end-of-headers)
 (defun kinopoisk--json-from-buffer (buffer)
   "In BUFFER get JSON, buffer created via `url-retrieve-synchronously'."
   (with-current-buffer buffer
