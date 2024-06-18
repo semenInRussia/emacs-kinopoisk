@@ -29,11 +29,13 @@
 (require 'kinopoisk)
 (require 'embark)
 
+(declare-function helm-kinopoisk--film-videos "helm-kinopoisk")
 
 (defvar-keymap embark-kinopoisk-film-map
   :doc "Keymap with a few film actions using `kinopoisk'."
   :parent embark-general-map
   "RET" #'kinopoisk-film-open-in-web
+  "v" #'helm-kinopoisk--film-videos
   "w w" #'kinopoisk-film-copy-web-url
   "w u" #'kinopoisk-film-copy-web-url
   "w n" #'kinopoisk-film-copy-name
@@ -46,23 +48,26 @@ Note that the cursor should be located before the opening double quote and the
 result is either nil or list where the `car' is symbol \\='kinopoisk-film and
 the second element has the type kinopoisk-film"
   (save-excursion
-    (when-let*
-        ((_ (looking-at "\""))
-         ;; skip opening quote
-         (_ (not (forward-char 1)))
-         (start (point))
-         (end (if (search-forward "\"" nil :noerror)
-                  (1- (point))
-                (point-max)))
-         (name (buffer-substring-no-properties start end))
-         (film (kinopoisk-search-one-film name)))
-      `(kinopoisk-film ,film
-                       ,start . ,end))))
+    (when (and (looking-at "\"") (not (forward-char 1)))
+      (let* ( ;; skip opening quote
+             (start (point))
+             (end (if (search-forward "\"" nil :noerror)
+                      (1- (point))
+                    (point-max)))
+             (name (buffer-substring-no-properties start end))
+             (film (kinopoisk-search-one-film name)))
+        `(kinopoisk-film ,film
+                         ,start . ,end)))))
+
+(defgroup embark-kinopoisk nil
+  "Support of `embark' for `kinopoisk'."
+  :group 'tools)
 
 ;;;###autoload
 (define-minor-mode embark-kinopoisk-mode
   "Support of `embark' for films using Kinopoisk API."
   :global t
+  :group 'embark-kinopoisk
   (cond
    (embark-kinopoisk-mode
     ;; enable
